@@ -675,6 +675,14 @@ La Parte B se simuló con Icarus Verilog y se comparó bit a bit contra la raíz
 
 La Parte B también se probó físicamente con la FPGA, el ESP32 y el script `bidireccional_q20.m`, y funcionó correctamente: la FPGA devolvió el valor $A^{n/2}$ en Q80.20 para los valores de $A$ y $n$ enviados desde MATLAB. No se cuenta con una captura de la consola de estas pruebas.
 
+Como referencia, la Figura 4 muestra la salida que `bidireccional_q20.m` debe imprimir para cinco pares $(A, n)$. No es una captura de la tarjeta: se reconstruyó calculando $\lfloor\sqrt{A^n \cdot 2^{40}}\rfloor$ con aritmética entera, el mismo cálculo que realiza la FPGA, y se presenta con el formato del script. Los resultados son los esperados: $4^{2/2}=4$, $\sqrt{2}\approx1.41421$, $9^{3/2}=27$, $10^{4/2}=100$ y $7^0=1$.
+
+<p align="center">
+  <img src="img/consola_q20_esperada.png" alt="Salida esperada de la consola de MATLAB para la Parte B" width="70%">
+  <br>
+  <em>Figura 4. Salida esperada (reconstruida, no capturada) de bidireccional_q20.m en formato Q80.20.</em>
+</p>
+
 El tiempo de cálculo en la FPGA es de aproximadamente $n + 102$ ciclos de reloj, es decir, unos 2 µs a 50 MHz. La respuesta completa tarda mucho más en transmitirse: 13 bytes de 10 bits cada uno a 9600 baudios equivalen a $130 / 9600 \approx 13.5$ ms. El cuello de botella es, por tanto, el enlace serial y no el cálculo.
 
 ## Análisis de resultados
