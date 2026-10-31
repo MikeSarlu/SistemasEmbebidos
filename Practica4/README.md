@@ -32,7 +32,7 @@ La computadora establece un puerto serial virtual con el ESP32 a través de su p
 
 Con un reloj de 50 MHz y una velocidad de 9600 baudios, el número de ciclos de reloj por bit es:
 
-$$N = \frac{50\,000\,000}{9600} \approx 5208 \tag{1}$$
+$$N = \frac{50000000}{9600} \approx 5208 \qquad (1)$$
 
 Este valor se utiliza para generar la duración de cada bit transmitido y para muestrear los bits recibidos. Al truncar a 5208 ciclos, la velocidad real es $50\,000\,000 / 5208 \approx 9600.6$ baudios, una diferencia de aproximadamente 0.006 % que no afecta la comunicación.
 
@@ -40,7 +40,7 @@ Este valor se utiliza para generar la duración de cada bit transmitido y para m
 
 Un número en formato Q80.20 utiliza 100 bits: 80 para la parte entera y 20 para la parte fraccionaria, de modo que el valor almacenado $V$ representa el número real $V / 2^{20}$. Para la Parte B se requiere $A^{n/2}$, que puede escribirse como la raíz cuadrada de $A^n$. Como $\sqrt{2^{40}} = 2^{20}$, la raíz entera de $A^n \cdot 2^{40}$ entrega directamente el resultado escalado:
 
-$$\left\lfloor \sqrt{A^n \cdot 2^{40}} \right\rfloor = \left\lfloor A^{n/2} \cdot 2^{20} \right\rfloor \tag{2}$$
+$$\left\lfloor \sqrt{A^n \cdot 2^{40}} \right\rfloor = \left\lfloor A^{n/2} \cdot 2^{20} \right\rfloor \qquad (2)$$
 
 El resultado es el piso (truncado) del valor real, con una resolución de $2^{-20} \approx 0.00000095$. El valor $A^n$ se obtiene con $n$ multiplicaciones sucesivas y la raíz entera con un algoritmo de un bit por ciclo de reloj.
 

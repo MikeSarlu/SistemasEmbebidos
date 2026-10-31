@@ -20,7 +20,7 @@ Diseñar e implementar una Unidad Aritmético-Lógica (ALU) de 5 bits utilizando
 
 El complemento a dos permite representar números positivos y negativos en una misma palabra binaria. Para obtener la representación de un número negativo se invierten los bits de su magnitud y se suma uno, conservando el ancho de la palabra [[1]](#referencias). Para esta práctica, el valor de una entrada se obtiene mediante:
 
-$$N = -16b_4 + 8b_3 + 4b_2 + 2b_1 + b_0 \tag{1}$$
+$$N = -16b_4 + 8b_3 + 4b_2 + 2b_1 + b_0 \qquad (1)$$
 
 De acuerdo con la Ecuación 1, el intervalo disponible es de $-16$ a $15$. Los cinco bits ya incluyen el signo. Por ejemplo, $10000_2$ representa $-16$ y $11111_2$ representa $-1$. El bit más significativo tiene peso negativo, los otros cuatro bits no representan por sí solos la magnitud de un número negativo.
 
@@ -28,9 +28,9 @@ De acuerdo con la Ecuación 1, el intervalo disponible es de $-16$ a $15$. Los c
 
 Un sumador completo recibe dos bits y un acarreo de entrada. Produce un bit de suma y un acarreo de salida [[2]](#referencias). Las siguientes ecuaciones describen ambas salidas:
 
-$$s_i = a_i \oplus b_i \oplus c_i \tag{2}$$
+$$s_i = a_i \oplus b_i \oplus c_i \qquad (2)$$
 
-$$c_{i+1} = a_i b_i + (a_i \oplus b_i)\, c_i \tag{3}$$
+$$c_{i+1} = a_i b_i + (a_i \oplus b_i) c_i \qquad (3)$$
 
 En la Ecuación 3, el signo $+$ indica OR y la multiplicación indica AND. Al conectar cinco etapas, el acarreo de una se utiliza como entrada de la siguiente. Para sumar únicamente los operandos, se fija $c_0 = 0$. Esta organización permite reutilizar una misma celda, aunque la salida depende de la propagación del acarreo entre etapas.
 
@@ -38,9 +38,9 @@ En la Ecuación 3, el signo $+$ indica OR y la multiplicación indica AND. Al co
 
 El restador completo calcula la diferencia de dos bits considerando un préstamo de entrada [[3]](#referencias). Sus salidas se describen mediante las siguientes ecuaciones:
 
-$$d_i = a_i \oplus b_i \oplus p_i \tag{4}$$
+$$d_i = a_i \oplus b_i \oplus p_i \qquad (4)$$
 
-$$p_{i+1} = \overline{a_i}\, b_i + \overline{a_i}\, p_i + b_i\, p_i \tag{5}$$
+$$p_{i+1} = \bar{a_i} b_i + \bar{a_i} p_i + b_i p_i \qquad (5)$$
 
 Para una resta $A-B$, el préstamo inicial es cero. Posteriormente, cada etapa transmite su préstamo a la siguiente. La Ecuación 5 incluye las negaciones de $a_i$, necesarias para detectar cuándo el minuendo no alcanza para efectuar la resta. El préstamo final y el desbordamiento con signo son señales distintas.
 
@@ -56,7 +56,7 @@ La codificación BCD asigna cuatro bits a cada dígito decimal. El decodificador
 
 Para desplegar un resultado negativo se separan el signo y la magnitud. Si $M = |R|$, las centenas, decenas y unidades satisfacen la Ecuación 6:
 
-$$M = 100C + 10D + U, \qquad 0 \leq C, D, U \leq 9 \tag{6}$$
+$$M = 100C + 10D + U, \qquad 0 \leq C, D, U \leq 9 \qquad (6)$$
 
 La Ecuación 6 permite verificar la conversión independientemente de la operación aritmética. Por ejemplo, 63 se representa con $C=0$, $D=6$ y $U=3$. El signo requiere una indicación adicional o una distribución de displays que lo contemple.
 

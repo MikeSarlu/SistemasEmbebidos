@@ -77,16 +77,16 @@ El circuito se organizó a partir de una descripción estructural respetando la 
 **1. Medio sumador.**
 Se creó un proyecto en el software Active-HDL con el objetivo de diseñar un medio sumador. Se describió el medio sumador usando las compuertas lógicas AND y XOR, que corresponden a las salidas de acarreo y suma. Posteriormente, se compiló el código y se realizó una simulación asignando los valores de 0 y 1 a las entradas. Para concluir, se verificó el correcto funcionamiento del medio sumador cuando se compararon los resultados con la tabla de verdad teórica para un medio sumador. Sus ecuaciones lógicas corresponden a:
 
-$$s = a \oplus b \tag{1}$$
+$$s = a \oplus b \qquad (1)$$
 
-$$c = a \cdot b \tag{2}$$
+$$c = a \cdot b \qquad (2)$$
 
 **2. Sumador completo.**
 Se desarrolló un sumador completo en un nuevo archivo dentro del entorno de Active-HDL. Para implementar este diseño se conectaron dos medios sumadores y una compuerta OR para el acarreo final. Después de la compilación, se realizó una simulación asignando valores de 0 y 1 a las entradas. Finalmente, se compararon los resultados obtenidos con la tabla de verdad correspondiente a un sumador completo, confirmando un comportamiento adecuado. Sus ecuaciones lógicas corresponden a:
 
-$$s = a \oplus b \oplus c_{\text{in}} \tag{3}$$
+$$s = a \oplus b \oplus c_{\text{in}} \qquad (3)$$
 
-$$c_{\text{out}} = (a \cdot b) + \big((a \oplus b) \cdot c_{\text{in}}\big) \tag{4}$$
+$$c_{\text{out}} = (a \cdot b) + \big((a \oplus b) \cdot c_{\text{in}}\big) \qquad (4)$$
 
 **3. Sumador de 16 bits.**
 Se implementó el diseño de un sumador de 16 bits conectando los módulos previamente creados. Para la primera etapa del bit menos significativo se instanció el módulo del medio sumador, ya que no se requiere procesar ningún acarreo de entrada. Para los 15 bits restantes se instanciaron quince módulos de sumador completo, interconectando el acarreo de salida de cada etapa con la entrada de acarreo de la siguiente etapa consecutiva mediante señales internas. El último acarreo generado en la etapa más significativa se extrajo directamente como la señal $C_{\text{out}}$ para encender un LED que indica el desbordamiento. Posteriormente, se compiló el archivo en Active-HDL y se aplicaron vectores de prueba con sumas simples, confirmando que la suma binaria total de 16 bits se generara de forma correcta.
@@ -128,7 +128,7 @@ El análisis experimental permitió comprobar cómo se relacionan la descripció
 
 La estructura del sumador elegido corresponde a un sumador por propagación de acarreo. Es decir, el tiempo que tarda el circuito en arrojar su salida depende del camino que recorre el acarreo desde el bit menos significativo hasta el bit más significativo, en este caso desde el bit 0 al bit 15. En el peor caso, el retardo total se define como:
 
-$$t_{\text{total}} = t_{\text{HA}} + 15 \cdot t_{\text{FA}} \tag{5}$$
+$$t_{\text{total}} = t_{\text{HA}} + 15 \cdot t_{\text{FA}} \qquad (5)$$
 
 donde $t_{\text{HA}}$ es el retardo del medio sumador en la primera etapa ($S_0$), y $t_{\text{FA}}$ es el tiempo que toma cada sumador completo en calcular y pasar el acarreo a la etapa siguiente.
 

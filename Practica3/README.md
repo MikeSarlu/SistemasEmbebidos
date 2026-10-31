@@ -20,7 +20,7 @@ Diseñar e implementar en Verilog un contador ascendente-descendente de 9 bits c
 
 Dentro de la aritmética digital, un vector binario de longitud $n = 9$ bits interpretado bajo el convenio de complemento a dos permite modelar cantidades enteras con signo dentro de los límites establecidos por la Ecuación 1 [[1]](#referencias):
 
-$$-2^{n-1} \le X \le 2^{n-1} - 1 \implies -2^8 \le X \le 2^8 - 1 \implies -256 \le X \le 255 \tag{1}$$
+$$-2^{n-1} \le X \le 2^{n-1} - 1 \implies -2^8 \le X \le 2^8 - 1 \implies -256 \le X \le 255 \qquad (1)$$
 
 El bit ubicado en la posición más significativa (índice 8 del vector) opera como indicador de polaridad: un estado lógico bajo (`0`) denota valores positivos o nulos, mientras que un estado lógico alto (`1`) identifica magnitudes estrictamente negativas.
 
@@ -38,7 +38,7 @@ La Tabla 1 presenta la codificación de valores representativos del contador.
 
 Dado que los sumadores binarios en hardware operan bajo aritmética modular de longitud fija, el desbordamiento en los extremos del intervalo produce una transición cíclica natural sin requerir comparadores adicionales, como se expresa en la Ecuación 2:
 
-$$(+255) + 1 \equiv -256 \pmod{2^9}, \qquad (-256) - 1 \equiv +255 \pmod{2^9} \tag{2}$$
+$$(+255) + 1 \equiv -256 \pmod{2^9}, \qquad (-256) - 1 \equiv +255 \pmod{2^9} \qquad (2)$$
 
 ### Partición entre control y ruta de datos
 
@@ -51,7 +51,7 @@ El diseño sigue una metodología estructurada que separa la lógica operativa e
 
 Una regla esencial en el diseño con FPGAs consiste en evitar la división del reloj maestro mediante salidas de contadores conectadas directamente a las entradas de reloj de otros flip-flops, ya que esto introduce sesgos temporales y dificulta el análisis estático de temporización. En su lugar, toda la red secuencial es alimentada por el oscilador principal de $F_{\text{clk}} = 50\text{ MHz}$ de la tarjeta DE10-Lite [[3]](#referencias). Para controlar la cadencia visual del conteo, un temporizador interno genera una bandera activa durante un único periodo de reloj (`pulso_hab`) tras contabilizar $N$ ciclos, calculados mediante la Ecuación 3:
 
-$$N = F_{\text{clk}} \times T_{\text{actualización}} \tag{3}$$
+$$N = F_{\text{clk}} \times T_{\text{actualización}} \qquad (3)$$
 
 - Para el periodo lento ($T = 1\text{ s}$): $N_{1\text{s}} = (50 \times 10^6\text{ Hz})(1\text{ s}) = 50{,}000{,}000$ ciclos (conteo de $0$ a $49{,}999{,}999$).
 - Para el periodo rápido ($T = 100\text{ ms}$): $N_{100\text{ms}} = (50 \times 10^6\text{ Hz})(0.1\text{ s}) = 5{,}000{,}000$ ciclos (conteo de $0$ a $4{,}999{,}999$).
