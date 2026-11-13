@@ -1,0 +1,9 @@
+# Trazas generadas por el testbench y por MATLAB
+traza_*.txt
+
+# Archivos generados por Quartus
+quartus/db/
+quartus/incremental_db/
+quartus/output_files/
+quartus/*.qws
+quartus/*.bak

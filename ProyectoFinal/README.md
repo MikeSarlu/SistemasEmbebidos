@@ -84,7 +84,7 @@ La intersección tiene cuatro accesos (norte, sur, este y oeste), cada uno con s
 | `110` | Hora pico asimétrica | 0.22 (792) | 0.15 (540) | 0.15 (540) | 0.08 (288) |
 | `111` | Demanda cambiante | Alterna entre `011` y `100` cada 15 min simulados | | | |
 
-Cada cola es un contador de 6 bits (0 a 63) con saturación. Mientras una fase tiene verde, cada uno de sus dos accesos descarga un vehículo cada 2 s, lo que corresponde a un flujo de saturación de 1800 veh/h por carril, un valor típico en vías urbanas [[5]](#referencias). Los escenarios se eligieron por debajo de la capacidad de la intersección, salvo `010`, que se acerca a ella para probar el comportamiento bajo carga alta. El escenario `111` sirve para observar cómo se adapta cada controlador cuando la demanda cambia de calle.
+Cada cola es un contador de 6 bits (0 a 63) con saturación. Mientras una fase tiene verde, cada uno de sus dos accesos descarga un vehículo cada 2 s, lo que corresponde a un flujo de saturación de 1800 veh/h por carril, un valor típico en vías urbanas [[5]](#referencias). El primer segundo de cada verde no hay salida, como tiempo perdido de arranque. Con el ciclo fijo de 20 s por fase (48 s en total), cada acceso descarga como máximo 10 vehículos por ciclo, unos 0.21 veh/s. Por eso los escenarios `010` y `011` quedan cerca del límite del tiempo fijo y `101` lo rebasa en el acceso norte, mientras que un controlador que redistribuya el verde puede atenderlos. El escenario `111` sirve para observar cómo se adapta cada controlador cuando la demanda cambia de calle.
 
 El módulo también entrega el número de llegadas de cada acceso en los últimos 30 s, que se usa como entrada del controlador.
 
@@ -111,7 +111,7 @@ Al entrar a cada fase verde, la FSM solicita al controlador la duración corresp
 |---|---|---|
 | $x_1$ | Cola mayor de los dos accesos que reciben el verde | 0 a 63 veh |
 | $x_2$ | Cola mayor de los dos accesos que quedan en rojo | 0 a 63 veh |
-| $x_3$ | Llegadas recientes al acceso más cargado de la fase que recibe el verde | 0 a 30 veh |
+| $x_3$ | Llegadas en los últimos 30 s, la mayor de los dos accesos que reciben el verde | 0 a 30 veh |
 
 Se toma el máximo de cada par porque la duración del verde depende del acceso crítico de la fase, es decir, el que tiene más demanda [[5]](#referencias). Si el verde alcanza para desalojar la cola mayor, también alcanza para la del acceso opuesto. Con este criterio el controlador conserva tres entradas y 27 reglas aunque la intersección tenga cuatro colas.
 
@@ -288,6 +288,31 @@ ProyectoFinal/
 3. Proyecto de Quartus con el archivo `.pof` grabado en la flash de la tarjeta.
 4. Reporte final en este mismo archivo, con las secciones usadas en las prácticas.
 5. Demostración en la tarjeta con monitor VGA.
+
+## 14. Avance
+
+### Etapa 1: semáforo de tiempo fijo y generador de tráfico
+
+| Archivo | Contenido |
+|---|---|
+| `rtl/semaforo_top.v` | Módulo superior: reinicio, switches, LEDs y displays |
+| `rtl/sim_tick.v` | Pulso de segundo simulado (x1 y x50), adaptado de la Práctica 3 |
+| `rtl/traffic_gen.v` | Tabla de escenarios e instancias de los cuatro accesos |
+| `rtl/acceso.v` | LFSR, cola, descarga y conteo de llegadas de un acceso |
+| `rtl/traffic_fsm.v` | Fases del semáforo y solicitud del verde al controlador |
+| `rtl/controlador_fijo.v` | Controlador de 20 s con la misma interfaz que tendrá el difuso |
+| `rtl/decoder_7seg.v` | Decodificador de la Práctica 2 |
+| `tb/tb_semaforo.v` | Testbench de los 8 escenarios; escribe `traza_verilog.txt` |
+| `matlab/simulador_trafico.m` | Réplica del generador y de la FSM |
+| `matlab/generar_traza_referencia.m` | Escribe `traza_matlab.txt` e imprime la línea base de tiempo fijo |
+| `matlab/comparar_trazas.m` | Compara ambas trazas fila por fila |
+| `quartus/pines_de10lite.tcl` | Asignación de pines de la DE10-Lite |
+
+**Validación de la etapa 1:**
+
+1. Simular `tb/tb_semaforo.v` junto con todos los archivos de `rtl/`. El testbench termina con el mensaje `Simulacion terminada sin errores` y deja `traza_verilog.txt` en la carpeta de trabajo del simulador (28,800 filas).
+2. En MATLAB, con `matlab/` como carpeta actual, ejecutar `generar_traza_referencia` y después `comparar_trazas('ruta/a/traza_verilog.txt')`. El resultado esperado es `Las trazas coinciden en las 28800 filas.`
+3. En Quartus, crear el proyecto con `semaforo_top` como entidad superior, agregar los archivos de `rtl/`, ejecutar `quartus/pines_de10lite.tcl` y compilar.
 
 ## Referencias
 
