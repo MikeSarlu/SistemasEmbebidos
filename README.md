@@ -48,6 +48,12 @@ Cada carpeta contiene el código Verilog y, en su propio `README.md`, el reporte
 | 3 | **Contador con signo** | Contador de 9 bits controlado con botones y displays | [Ver reporte](Practica3/) |
 | 4 | **UART** | Transmisor y receptor serial en la DE10-Lite | [Ver reporte](Practica4/) |
 
+## Proyecto final
+
+| Proyecto | Descripción | Documento |
+|---|---|:--:|
+| **Semáforo inteligente** | Controlador difuso Sugeno con parámetros entrenados por ANFIS, tráfico simulado en la FPGA y salida VGA | [Ver plan](ProyectoFinal/) |
+
 ## Formato de los reportes
 
 Todos los reportes siguen las mismas secciones:
