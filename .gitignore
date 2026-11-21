@@ -1,0 +1,24 @@
+# Archivos generados por Active-HDL
+**/log/
+**/compile/
+*.wsw
+*.aws
+*.adf
+*.set
+*.order
+library.cfg
+projlib.cfg
+compile.cfg
+Edfmap.ini
+
+# Archivos generados por Quartus
+**/db/
+**/incremental_db/
+**/output_files/
+*.qws
+*.bak
+
+# Sistema operativo
+Thumbs.db
+desktop.ini
+.DS_Store
