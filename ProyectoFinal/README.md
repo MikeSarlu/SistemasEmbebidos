@@ -125,12 +125,14 @@ donde $z_i$ es el consecuente constante de la regla $i$. Se usa el producto como
 
 **Decisiones de implementación:**
 
-- Una función triangular con vértices $a \le b \le c$ requiere dividir entre $(b-a)$ y $(c-b)$. Para evitar divisores, MATLAB precalcula los recíprocos y los guarda en la ROM, de modo que cada grado de pertenencia se obtiene con una resta y una multiplicación.
-- Las 27 reglas se evalúan secuencialmente, una por ciclo, con dos multiplicadores para el producto y uno para $w_i z_i$. Los dos acumuladores tienen 32 bits.
-- La división final se hace con un divisor secuencial de restauración de 32 ciclos.
-- El cálculo completo toma menos de 100 ciclos (menos de 2 µs), despreciable frente a la escala de segundos del semáforo.
+- Una función triangular con vértices $a \le b \le c$ requiere dividir entre $(b-a)$ y $(c-b)$. Para evitar divisores, MATLAB precalcula los recíprocos y los guarda en la ROM, de modo que cada grado de pertenencia se obtiene con una resta y una multiplicación. Los recíprocos se guardan en Q0.16 en lugar de Q8.8, porque con solo 8 bits fraccionarios $1/15$ tendría un error cercano al 2 %.
+- Los grados de pertenencia y los pesos $w_i$ se representan en Q0.16.
+- Las 27 reglas se evalúan secuencialmente, una por ciclo, en un pipeline de tres etapas: dos multiplicadores para el producto y uno para $w_i z_i$. Los dos acumuladores tienen 32 bits.
+- La división final se hace con un divisor secuencial de restauración. Como el resultado cabe en 16 bits (Q8.8), bastan 16 ciclos.
+- El cálculo completo toma unos 95 ciclos (menos de 2 µs), despreciable frente a la escala de segundos del semáforo.
+- Si ninguna regla se activa ($\sum w_i = 0$), el controlador responde 20 s. `exportar_parametros.m` comprueba que esto no ocurra con los parámetros cuantizados.
 
-**Organización de la ROM** (palabras de 16 bits en Q8.8):
+**Organización de la ROM** (palabras de 16 bits; $a$, $b$, $c$ en Q8.8 con signo, recíprocos en Q0.16 y $z_i$ en Q8.8):
 
 | Contenido | Palabras |
 |---|:--:|
@@ -313,6 +315,37 @@ ProyectoFinal/
 1. Simular `tb/tb_semaforo.v` junto con todos los archivos de `rtl/`. El testbench termina con el mensaje `Simulacion terminada sin errores` y deja `traza_verilog.txt` en la carpeta de trabajo del simulador (28,800 filas).
 2. En MATLAB, con `matlab/` como carpeta actual, ejecutar `generar_traza_referencia` y después `comparar_trazas('ruta/a/traza_verilog.txt')`. El resultado esperado es `Las trazas coinciden en las 28800 filas.`
 3. En Quartus, crear el proyecto con `semaforo_top` como entidad superior, agregar los archivos de `rtl/`, ejecutar `quartus/pines_de10lite.tcl` y compilar.
+
+### Etapa 2: controlador difuso y parámetros en ROM
+
+| Archivo | Contenido |
+|---|---|
+| `matlab/fis_manual.m` | FIS Sugeno con funciones y reglas definidas a criterio |
+| `matlab/exportar_parametros.m` | Valida y corrige los FIS, cuantiza y escribe `rom/parametros.hex` y `rom/parametros.mif` |
+| `matlab/fuzzy_punto_fijo.m` | Réplica bit a bit de `fuzzy_controller.v` |
+| `matlab/vectores_prueba.m` | Casos límite y 1000 vectores aleatorios por conjunto, con la salida de `evalfis` y la salida exacta esperada |
+| `matlab/generar_parametros.m` | Ejecuta todo lo anterior |
+| `rom/parametros.hex`, `rom/parametros.mif` | Cuatro conjuntos de 128 palabras: tiempo fijo, manual, ANFIS y fminsearch |
+| `rtl/rom_parametros.v` | ROM síncrona de 512 × 16 bits, inicializada con `$readmemh` |
+| `rtl/fuzzy_controller.v` | Controlador difuso con la misma interfaz que `controlador_fijo.v` más la entrada `conjunto` |
+| `tb/tb_fuzzy_controller.v` | Testbench que compara el controlador con `tb/vectores_fuzzy.txt` |
+
+**FIS manual.** Las colas usan funciones centradas en 0, 15 y 30 vehículos, porque una cola de 15 ya ocupa casi todo el verde máximo (unos 2q + 1 s para desalojar q vehículos). Las llegadas recientes usan funciones centradas en 0, 5 y 10. Los consecuentes se obtienen como $z = \text{base}(x_1) + \text{ajuste}(x_2) + \text{ajuste}(x_3)$, limitado a 5-40 s:
+
+*Tabla 6. Consecuentes del FIS manual (s). Cada celda indica los valores para $x_3$ baja / media / alta.*
+
+| $x_1$ \ $x_2$ | Baja | Media | Alta |
+|---|:--:|:--:|:--:|
+| **Baja** | 8 / 12 / 14 | 5 / 8 / 10 | 5 / 5 / 5 |
+| **Media** | 24 / 28 / 30 | 20 / 24 / 26 | 14 / 18 / 20 |
+| **Alta** | 38 / 40 / 40 | 34 / 38 / 40 | 28 / 32 / 34 |
+
+Mientras no existan los FIS de ANFIS y de fminsearch, los conjuntos 2 y 3 de la ROM usan el manual. El controlador todavía no está conectado a `semaforo_top.v`; esa integración corresponde a la semana 3.
+
+**Validación de la etapa 2:**
+
+1. En MATLAB, con `matlab/` como carpeta actual, ejecutar `generar_parametros`. Regenera `rom/parametros.hex`, `rom/parametros.mif` y `tb/vectores_fuzzy.txt`, e imprime el error de cuantización de cada conjunto respecto a `evalfis`, que debe ser menor a 0.5 s. Los archivos incluidos en el repositorio se generaron con una réplica de estos scripts fuera de MATLAB (error máximo de 0.005 s), así que conviene regenerarlos y confirmar que no cambian.
+2. Simular `tb/tb_fuzzy_controller.v` junto con `rtl/rom_parametros.v` y `rtl/fuzzy_controller.v`, con `ProyectoFinal/` como carpeta de simulación (o cambiar los parámetros `ARCHIVO_ROM` y `ARCHIVO_VECTORES` del testbench). El resultado esperado es `Simulacion terminada sin errores` con 9760 vectores probados y una latencia de unos 95 ciclos.
 
 ## Referencias
 
